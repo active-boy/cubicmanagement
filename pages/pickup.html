@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>取车 - 立体停车场管理系统</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/pickup.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: bold;">P</div>
+                <h1>立体停车场管理系统</h1>
+            </div>
+            <nav>
+                <button class="nav-btn" onclick="navigateTo('../index.html')">首页</button>
+                <button class="nav-btn" onclick="navigateTo('reservation.html')">预约车位</button>
+                <button class="nav-btn" onclick="navigateTo('realtime-display.html')">实时车位</button>
+                <button class="nav-btn" onclick="navigateTo('alarm.html')">应急报警</button>
+                <button class="nav-btn active" onclick="navigateTo('pickup.html')">取车</button>
+            </nav>
+        </header>
+
+        <main>
+            <div class="pickup-container">
+                <h2>取车服务</h2>
+                
+                <!-- 查询方式选择 -->
+                <div class="search-methods">
+                    <button class="method-btn active" data-method="phone" onclick="switchSearchMethod('phone')">手机号查询</button>
+                    <button class="method-btn" data-method="order" onclick="switchSearchMethod('order')">预约编号查询</button>
+                </div>
+
+                <!-- 手机号查询 -->
+                <div class="search-form" id="phoneSearch">
+                    <div class="form-group">
+                        <label>手机号：</label>
+                        <input type="tel" id="searchPhone" placeholder="请输入预约时使用的手机号" maxlength="11">
+                    </div>
+                    <button class="search-btn" onclick="searchByPhone()">查询预约信息</button>
+                </div>
+
+                <!-- 预约编号查询 -->
+                <div class="search-form" id="orderSearch" style="display:none;">
+                    <div class="form-group">
+                        <label>预约编号：</label>
+                        <input type="text" id="searchOrderId" placeholder="请输入预约编号">
+                    </div>
+                    <button class="search-btn" onclick="searchByOrderId()">查询预约信息</button>
+                </div>
+
+                <!-- 预约信息显示 -->
+                <div class="reservation-info" id="reservationInfo" style="display:none;">
+                    <h3>预约信息</h3>
+                    <div class="info-card">
+                        <div class="info-row">
+                            <span class="label">预约编号：</span>
+                            <span class="value" id="infoOrderId">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">手机号：</span>
+                            <span class="value" id="infoPhone">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">车库位置：</span>
+                            <span class="value" id="infoLocation">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">预约时间：</span>
+                            <span class="value" id="infoTimeRange">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">当前状态：</span>
+                            <span class="value" id="infoStatus">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">停车时长：</span>
+                            <span class="value" id="infoDuration">-</span>
+                        </div>
+                        <div class="info-row overtime-row" id="overtimeRow" style="display:none;">
+                            <span class="label">超时费用：</span>
+                            <span class="value" id="overtimeFee">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="pickup-actions">
+                        <button class="pickup-btn" onclick="showPickupConfirm()">确认取车</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 取车确认弹窗 -->
+        <div id="pickupConfirmModal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>确认取车</h3>
+                    <span class="close" onclick="closePickupModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <p>请确认以下信息：</p>
+                    <div class="confirm-details">
+                        <div><strong>车位：</strong> <span id="confirmSpot">-</span></div>
+                        <div><strong>预约时间：</strong> <span id="confirmTime">-</span></div>
+                        <div id="confirmOvertime" style="display:none; color:#ff4757;">
+                            <strong>超时费用：</strong> <span id="confirmOvertimeFee">-</span>
+                        </div>
+                    </div>
+                    <p class="warning-text">⚠️ 取车后将释放车位，请确认车辆已准备就绪！</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="cancel-modal-btn" onclick="closePickupModal()">取消</button>
+                    <button class="confirm-modal-btn" onclick="confirmPickup()">确认取车</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 超时支付弹窗 -->
+        <div id="overtimePaymentModal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>超时费用支付</h3>
+                    <span class="close" onclick="closeOvertimeModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <p>您的停车已超时，需要支付额外费用：</p>
+                    <div class="overtime-details">
+                        <div><strong>超时时长：</strong> <span id="overtimeHours">-</span> 小时</div>
+                        <div><strong>超时费用：</strong> <span id="overtimeAmount">-</span></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="confirm-modal-btn" onclick="goToOvertimePayment()">前往支付</button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2024 立体停车场管理系统 | 服务热线: 400-123-4567</p>
+        </footer>
+    </div>
+
+    <script>
+        // 全局变量
+        let currentReservation = null;
+        let currentSearchMethod = 'phone';
+        let currentOvertimeInfo = null;
+        
+        // 导航函数
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+        
+        // 显示消息
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message message-${type}`;
+            messageDiv.textContent = message;
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                background: ${type === 'error' ? '#ff4757' : type === 'success' ? '#00a8ff' : '#667eea'};
+                color: white;
+                border-radius: 5px;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+            document.body.appendChild(messageDiv);
+            setTimeout(() => messageDiv.remove(), 3000);
+        }
+        
+        // 切换查询方式
+        function switchSearchMethod(method) {
+            currentSearchMethod = method;
+            
+            // 更新按钮样式
+            document.querySelectorAll('.method-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.method-btn[data-method="${method}"]`).classList.add('active');
+            
+            // 切换表单显示
+            const phoneSearch = document.getElementById('phoneSearch');
+            const orderSearch = document.getElementById('orderSearch');
+            
+            if (method === 'phone') {
+                phoneSearch.style.display = 'block';
+                orderSearch.style.display = 'none';
+            } else {
+                phoneSearch.style.display = 'none';
+                orderSearch.style.display = 'block';
+            }
+            
+            // 隐藏预约信息
+            document.getElementById('reservationInfo').style.display = 'none';
+            currentReservation = null;
+        }
+        
+        // 通过手机号查询
+        function searchByPhone() {
+            const phone = document.getElementById('searchPhone').value;
+            
+            if (!phone || phone.length !== 11) {
+                showMessage('请输入有效的11位手机号码', 'error');
+                return;
+            }
+            
+            // 从localStorage获取预约数据
+            const reservations = JSON.parse(localStorage.getItem('parking_reservations') || '[]');
+            const now = new Date();
+            
+            // 查找该手机号的有效预约（未完成、未取消、未过期）
+            const reservation = reservations.find(r => 
+                r.phoneNumber === phone && 
+                r.status !== 'cancelled' && 
+                r.status !== 'completed' &&
+                new Date(r.endTime) >= now
+            );
+            
+            if (!reservation) {
+                showMessage('未找到该手机号的有效预约记录', 'error');
+                return;
+            }
+            
+            displayReservationInfo(reservation);
+        }
+        
+        // 通过订单号查询
+        function searchByOrderId() {
+            const orderId = document.getElementById('searchOrderId').value;
+            
+            if (!orderId) {
+                showMessage('请输入预约编号', 'error');
+                return;
+            }
+            
+            // 从localStorage获取预约数据
+            const reservations = JSON.parse(localStorage.getItem('parking_reservations') || '[]');
+            const reservation = reservations.find(r => r.orderId === orderId);
+            
+            if (!reservation) {
+                showMessage('未找到该订单号的预约记录', 'error');
+                return;
+            }
+            
+            displayReservationInfo(reservation);
+        }
+        
+        // 显示预约信息
+        function displayReservationInfo(reservation) {
+            currentReservation = reservation;
+            
+            const now = new Date();
+            const endTime = new Date(reservation.endTime);
+            const startTime = new Date(reservation.startTime);
+            const isOvertime = now > endTime;
+            const isCompleted = reservation.status === 'completed';
+            const isCancelled = reservation.status === 'cancelled';
+            
+            // 计算停车时长
+            const pickupTime = reservation.pickupTime ? new Date(reservation.pickupTime) : now;
+            const duration = (pickupTime - startTime) / (1000 * 60 * 60);
+            
+            // 计算超时费用
+            if (isOvertime && !isCompleted && !isCancelled) {
+                const overtimeHours = Math.ceil((now - endTime) / (1000 * 60 * 60));
+                currentOvertimeInfo = {
+                    hasOvertime: true,
+                    hours: overtimeHours,
+                    fee: overtimeHours * 5
+                };
+            } else {
+                currentOvertimeInfo = null;
+            }
+            
+            document.getElementById('infoOrderId').textContent = reservation.orderId || '未知';
+            document.getElementById('infoPhone').textContent = maskPhone(reservation.phoneNumber);
+            document.getElementById('infoLocation').textContent = `${reservation.garage}区 ${reservation.level}层 ${reservation.spotNumber}号`;
+            document.getElementById('infoTimeRange').textContent = `${formatDateTime(startTime)} - ${formatDateTime(endTime)}`;
+            
+            let statusText = '';
+            let statusColor = '';
+            if (isCompleted) {
+                statusText = '已完成取车';
+                statusColor = '#00a8ff';
+            } else if (isCancelled) {
+                statusText = '已取消';
+                statusColor = '#999';
+            } else if (isOvertime) {
+                statusText = '超时停放';
+                statusColor = '#ff4757';
+            } else {
+                statusText = '正常停放';
+                statusColor = '#00a8ff';
+            }
+            const statusSpan = document.getElementById('infoStatus');
+            statusSpan.textContent = statusText;
+            statusSpan.style.color = statusColor;
+            
+            document.getElementById('infoDuration').textContent = `${duration.toFixed(1)} 小时`;
+            
+            if (currentOvertimeInfo && currentOvertimeInfo.hasOvertime) {
+                const overtimeRow = document.getElementById('overtimeRow');
+                const overtimeFeeSpan = document.getElementById('overtimeFee');
+                if (overtimeRow && overtimeFeeSpan) {
+                    overtimeRow.style.display = 'flex';
+                    overtimeFeeSpan.textContent = `¥${currentOvertimeInfo.fee} (超时${currentOvertimeInfo.hours}小时)`;
+                }
+            } else {
+                document.getElementById('overtimeRow').style.display = 'none';
+            }
+            
+            // 禁用取车按钮如果已完成或已取消
+            const pickupBtn = document.querySelector('.pickup-btn');
+            if (pickupBtn) {
+                if (isCompleted || isCancelled) {
+                    pickupBtn.disabled = true;
+                    pickupBtn.style.opacity = '0.5';
+                    pickupBtn.style.cursor = 'not-allowed';
+                } else {
+                    pickupBtn.disabled = false;
+                    pickupBtn.style.opacity = '1';
+                    pickupBtn.style.cursor = 'pointer';
+                }
+            }
+            
+            document.getElementById('reservationInfo').style.display = 'block';
+        }
+        
+        // 显示取车确认弹窗
+        function showPickupConfirm() {
+            if (!currentReservation) return;
+            
+            const startTime = new Date(currentReservation.startTime);
+            const endTime = new Date(currentReservation.endTime);
+            
+            document.getElementById('confirmSpot').textContent = `${currentReservation.garage}区 ${currentReservation.level}层 ${currentReservation.spotNumber}号`;
+            document.getElementById('confirmTime').textContent = `${formatDateTime(startTime)} - ${formatDateTime(endTime)}`;
+            
+            if (currentOvertimeInfo && currentOvertimeInfo.hasOvertime) {
+                document.getElementById('confirmOvertime').style.display = 'block';
+                document.getElementById('confirmOvertimeFee').textContent = `¥${currentOvertimeInfo.fee}`;
+            } else {
+                document.getElementById('confirmOvertime').style.display = 'none';
+            }
+            
+            document.getElementById('pickupConfirmModal').style.display = 'flex';
+        }
+        
+        // 关闭取车确认弹窗
+        function closePickupModal() {
+            document.getElementById('pickupConfirmModal').style.display = 'none';
+        }
+        
+        // 关闭超时支付弹窗
+        function closeOvertimeModal() {
+            document.getElementById('overtimePaymentModal').style.display = 'none';
+        }
+        
+        // 确认取车
+        function confirmPickup() {
+            closePickupModal();
+            
+            const now = new Date();
+            const endTime = new Date(currentReservation.endTime);
+            const isOvertime = now > endTime;
+            
+            if (isOvertime && currentOvertimeInfo) {
+                // 有超时，显示超时支付弹窗
+                document.getElementById('overtimeHours').textContent = currentOvertimeInfo.hours;
+                document.getElementById('overtimeAmount').textContent = `¥${currentOvertimeInfo.fee}`;
+                document.getElementById('overtimePaymentModal').style.display = 'flex';
+            } else {
+                // 无超时，直接完成取车
+                completePickup();
+            }
+        }
+        
+        // 前往超时支付
+        function goToOvertimePayment() {
+            closeOvertimeModal();
+            
+            // 保存超时支付信息到sessionStorage
+            sessionStorage.setItem('overtimePayment', JSON.stringify({
+                reservation: currentReservation,
+                overtimeInfo: currentOvertimeInfo
+            }));
+            
+            window.location.href = 'payment.html';
+        }
+        
+        // 完成取车
+        function completePickup() {
+            // 更新预约状态
+            const reservations = JSON.parse(localStorage.getItem('parking_reservations') || '[]');
+            const index = reservations.findIndex(r => r.id === currentReservation.id);
+            if (index !== -1) {
+                reservations[index].status = 'completed';
+                reservations[index].pickupTime = new Date().toISOString();
+                localStorage.setItem('parking_reservations', JSON.stringify(reservations));
+                
+                // 释放车位 - 更新停车场数据
+                const parkingData = JSON.parse(localStorage.getItem('parking_structure') || '{}');
+                if (parkingData.spots && 
+                    parkingData.spots[currentReservation.garage] && 
+                    parkingData.spots[currentReservation.garage][currentReservation.level] &&
+                    parkingData.spots[currentReservation.garage][currentReservation.level][currentReservation.spotNumber]) {
+                    parkingData.spots[currentReservation.garage][currentReservation.level][currentReservation.spotNumber].isAvailable = true;
+                    localStorage.setItem('parking_structure', JSON.stringify(parkingData));
+                }
+            }
+            
+            showMessage('取车成功！感谢您的使用！', 'success');
+            
+            // 重置页面
+            document.getElementById('reservationInfo').style.display = 'none';
+            document.getElementById('searchPhone').value = '';
+            document.getElementById('searchOrderId').value = '';
+            currentReservation = null;
+            currentOvertimeInfo = null;
+        }
+        
+        // 辅助函数
+        function maskPhone(phone) {
+            if (!phone || phone.length !== 11) return phone;
+            return phone.substring(0, 3) + '****' + phone.substring(7);
+        }
+        
+        function formatDateTime(date) {
+            return `${date.getMonth()+1}/${date.getDate()} ${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`;
+        }
+        
+        // 添加动画样式
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            .modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+            }
+            .modal-content {
+                background: white;
+                border-radius: 10px;
+                width: 90%;
+                max-width: 450px;
+                animation: slideIn 0.3s ease;
+            }
+            .modal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 20px;
+                border-bottom: 1px solid #e0e0e0;
+            }
+            .modal-header .close {
+                font-size: 28px;
+                cursor: pointer;
+                color: #999;
+            }
+            .modal-body {
+                padding: 20px;
+            }
+            .modal-footer {
+                padding: 20px;
+                border-top: 1px solid #e0e0e0;
+                display: flex;
+                justify-content: flex-end;
+                gap: 10px;
+            }
+            .confirm-details, .overtime-details {
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: 8px;
+                margin: 15px 0;
+            }
+            .confirm-details div, .overtime-details div {
+                padding: 5px 0;
+            }
+            .warning-text {
+                color: #ff4757;
+                font-size: 14px;
+                margin-top: 10px;
+            }
+            .cancel-modal-btn {
+                background: #f0f0f0;
+                color: #333;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            .confirm-modal-btn {
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // 暴露全局函数
+        window.navigateTo = navigateTo;
+        window.switchSearchMethod = switchSearchMethod;
+        window.searchByPhone = searchByPhone;
+        window.searchByOrderId = searchByOrderId;
+        window.showPickupConfirm = showPickupConfirm;
+        window.closePickupModal = closePickupModal;
+        window.closeOvertimeModal = closeOvertimeModal;
+        window.confirmPickup = confirmPickup;
+        window.goToOvertimePayment = goToOvertimePayment;
+    </script>
+</body>
+</html>

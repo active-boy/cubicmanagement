@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>应急报警 - 立体停车场管理系统</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/alarm.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <img src="../images/logo.png" alt="停车场Logo" onerror="this.src='https://via.placeholder.com/50x50?text=P'">
+                <h1>立体停车场管理系统</h1>
+            </div>
+            <nav>
+                <button class="nav-btn" onclick="navigateTo('../index.html')">首页</button>
+                <button class="nav-btn" onclick="navigateTo('reservation.html')">预约车位</button>
+                <button class="nav-btn" onclick="navigateTo('realtime-display.html')">实时车位</button>
+                <button class="nav-btn active" onclick="navigateTo('alarm.html')">应急报警</button>
+                <button class="nav-btn" onclick="navigateTo('pickup.html')">取车</button>
+            </nav>
+        </header>
+
+        <main>
+            <div class="alarm-container">
+                <h2>应急报警系统</h2>
+                
+                <!-- 报警类型选择 -->
+                <div class="alarm-types">
+                    <h3>请选择报警类型</h3>
+                    <div class="type-grid">
+                        <div class="type-card" data-type="fire">
+                            <div class="type-icon">🔥</div>
+                            <div class="type-name">火灾报警</div>
+                            <div class="type-desc">发现火情或烟雾</div>
+                        </div>
+                        <div class="type-card" data-type="accident">
+                            <div class="type-icon">🚗</div>
+                            <div class="type-name">车辆事故</div>
+                            <div class="type-desc">车辆碰撞或刮擦</div>
+                        </div>
+                        <div class="type-card" data-type="medical">
+                            <div class="type-icon">🚑</div>
+                            <div class="type-name">医疗急救</div>
+                            <div class="type-desc">人员受伤或不适</div>
+                        </div>
+                        <div class="type-card" data-type="security">
+                            <div class="type-icon">🔒</div>
+                            <div class="type-name">安全威胁</div>
+                            <div class="type-desc">可疑人员或行为</div>
+                        </div>
+                        <div class="type-card" data-type="technical">
+                            <div class="type-icon">⚙️</div>
+                            <div class="type-name">设备故障</div>
+                            <div class="type-desc">停车设备异常</div>
+                        </div>
+                        <div class="type-card" data-type="other">
+                            <div class="type-icon">📞</div>
+                            <div class="type-name">其他紧急情况</div>
+                            <div class="type-desc">其他需要帮助</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 报警表单 -->
+                <div class="alarm-form" id="alarmForm" style="display:none;">
+                    <h3>详细信息</h3>
+                    <div class="form-group">
+                        <label>您的手机号：</label>
+                        <input type="tel" id="alarmPhone" placeholder="请输入手机号以便联系您">
+                    </div>
+                    <div class="form-group">
+                        <label>当前位置：</label>
+                        <select id="alarmLocation">
+                            <option value="">请选择当前位置</option>
+                            <option value="A区">A区</option>
+                            <option value="B区">B区</option>
+                            <option value="C区">C区</option>
+                            <option value="D区">D区</option>
+                            <option value="E区">E区</option>
+                            <option value="F区">F区</option>
+                            <option value="G区">G区</option>
+                            <option value="H区">H区</option>
+                            <option value="入口处">入口处</option>
+                            <option value="出口处">出口处</option>
+                            <option value="电梯口">电梯口</option>
+                            <option value="楼梯间">楼梯间</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>车库号：</label>
+                        <select id="alarmGarage">
+                            <option value="">请选择车库号</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>层数：</label>
+                        <select id="alarmLevel">
+                            <option value="">请选择层数</option>
+                            <option value="1">一层</option>
+                            <option value="2">二层</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>详细描述：</label>
+                        <textarea id="alarmDescription" rows="4" placeholder="请详细描述紧急情况..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>紧急程度：</label>
+                        <div class="urgency-levels">
+                            <label class="urgency-option">
+                                <input type="radio" name="urgency" value="low"> 
+                                <span>一般</span>
+                            </label>
+                            <label class="urgency-option">
+                                <input type="radio" name="urgency" value="medium"> 
+                                <span>紧急</span>
+                            </label>
+                            <label class="urgency-option">
+                                <input type="radio" name="urgency" value="high"> 
+                                <span>非常紧急</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="alarm-actions">
+                        <button class="cancel-btn" onclick="resetAlarmForm()">取消</button>
+                        <button class="submit-alarm-btn" onclick="submitAlarm()">立即报警</button>
+                    </div>
+                </div>
+
+                <!-- 报警记录 -->
+                <div class="alarm-history">
+                    <h3>最近报警记录</h3>
+                    <div class="history-list" id="alarmHistory">
+                        <div class="history-empty">暂无报警记录</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 报警确认弹窗 -->
+        <div id="alarmConfirmModal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>确认报警</h3>
+                    <span class="close" onclick="closeAlarmModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <p>⚠️ 请确认您的情况确实需要紧急援助！</p>
+                    <p>虚报警报将承担相应法律责任。</p>
+                    <p id="alarmConfirmMsg"></p>
+                </div>
+                <div class="modal-footer">
+                    <button class="cancel-modal-btn" onclick="closeAlarmModal()">取消</button>
+                    <button class="confirm-modal-btn" onclick="confirmAlarm()">确认报警</button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2024 立体停车场管理系统 | 服务热线: 400-123-4567 | 紧急电话: 110/119/120</p>
+        </footer>
+    </div>
+
+    <script src="../script.js"></script>
+    <script src="../js/api/parking-data.js"></script>
+    <script src="../js/pages/alarm.js"></script>
+</body>
+</html>

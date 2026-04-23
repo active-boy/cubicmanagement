@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实时车位显示 - 立体停车场管理系统</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/realtime.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <img src="../images/logo.png" alt="停车场Logo" onerror="this.src='https://via.placeholder.com/50x50?text=P'">
+                <h1>立体停车场管理系统</h1>
+            </div>
+            <nav>
+                <button class="nav-btn" onclick="navigateTo('../index.html')">首页</button>
+                <button class="nav-btn" onclick="navigateTo('reservation.html')">预约车位</button>
+                <button class="nav-btn active" onclick="navigateTo('realtime-display.html')">实时车位</button>
+                <button class="nav-btn" onclick="navigateTo('alarm.html')">应急报警</button>
+                <button class="nav-btn" onclick="navigateTo('pickup.html')">取车</button>
+            </nav>
+        </header>
+
+        <main>
+            <div class="realtime-container">
+                <h2>实时车位占用情况</h2>
+                
+                <!-- 筛选栏 -->
+                <div class="filter-bar">
+                    <select id="filterGarage" onchange="filterDisplay()">
+                        <option value="all">所有车库</option>
+                    </select>
+                    <select id="filterLevel" onchange="filterDisplay()">
+                        <option value="all">所有层数</option>
+                        <option value="1">一层</option>
+                        <option value="2">二层</option>
+                    </select>
+                    <button class="refresh-btn" onclick="refreshDisplay()">
+                        🔄 刷新数据
+                    </button>
+                </div>
+
+                <!-- 统计信息 -->
+                <div class="stats-summary">
+                    <div class="stat-item">
+                        <span class="stat-label">总车位：</span>
+                        <span class="stat-value" id="totalSpots">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">已预约：</span>
+                        <span class="stat-value" id="bookedSpots">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">空闲：</span>
+                        <span class="stat-value" id="availableSpots">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">占用率：</span>
+                        <span class="stat-value" id="occupancyRate">0%</span>
+                    </div>
+                </div>
+
+                <!-- 车库显示区域 -->
+                <div id="garageDisplay" class="garage-display">
+                    <!-- 车库将动态生成 -->
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 立体停车场管理系统 | 服务热线: 400-123-4567</p>
+        </footer>
+    </div>
+
+    <script src="../script.js"></script>
+    <script src="../js/api/parking-data.js"></script>
+    <script src="../js/api/reservation-api.js"></script>
+    <script src="../js/pages/realtime-display.js"></script>
+</body>
+</html>

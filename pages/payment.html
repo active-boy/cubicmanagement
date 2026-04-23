@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>支付中心 - 立体停车场管理系统</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/payment.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: bold;">P</div>
+                <h1>立体停车场管理系统</h1>
+            </div>
+            <nav>
+                <button class="nav-btn" onclick="navigateTo('../index.html')">首页</button>
+                <button class="nav-btn" onclick="navigateTo('reservation.html')">预约车位</button>
+                <button class="nav-btn" onclick="navigateTo('realtime-display.html')">实时车位</button>
+                <button class="nav-btn" onclick="navigateTo('alarm.html')">应急报警</button>
+                <button class="nav-btn" onclick="navigateTo('pickup.html')">取车</button>
+            </nav>
+        </header>
+
+        <main>
+            <div class="payment-container">
+                <h2>支付中心</h2>
+                
+                <div class="payment-steps">
+                    <div class="payment-step active" id="step1">
+                        <div class="step-number">1</div>
+                        <div class="step-text">确认订单</div>
+                    </div>
+                    <div class="payment-step" id="step2">
+                        <div class="step-number">2</div>
+                        <div class="step-text">选择支付方式</div>
+                    </div>
+                    <div class="payment-step" id="step3">
+                        <div class="step-number">3</div>
+                        <div class="step-text">支付完成</div>
+                    </div>
+                </div>
+
+                <div class="payment-content" id="step1Content">
+                    <div class="order-info">
+                        <h3>订单详情</h3>
+                        <div class="info-row">
+                            <span class="info-label">预约编号：</span>
+                            <span class="info-value" id="orderId">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">手机号：</span>
+                            <span class="info-value" id="phoneNumber">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">车库位置：</span>
+                            <span class="info-value" id="location">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">预约时间：</span>
+                            <span class="info-value" id="timeRange">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">停车时长：</span>
+                            <span class="info-value" id="duration">-</span>
+                        </div>
+                        <div class="info-row total-row">
+                            <span class="info-label">应付金额：</span>
+                            <span class="info-value" id="totalAmount">¥0</span>
+                        </div>
+                    </div>
+                    <button class="next-payment-btn" onclick="goToPaymentStep2()">下一步</button>
+                </div>
+
+                <div class="payment-content" style="display:none;" id="step2Content">
+                    <div class="payment-methods">
+                        <h3>选择支付方式</h3>
+                        <div class="method-list">
+                            <div class="method-item" data-method="wechat" onclick="selectPaymentMethod('wechat')">
+                                <div class="method-icon">💬</div>
+                                <div class="method-name">微信支付</div>
+                            </div>
+                            <div class="method-item" data-method="alipay" onclick="selectPaymentMethod('alipay')">
+                                <div class="method-icon">💰</div>
+                                <div class="method-name">支付宝</div>
+                            </div>
+                            <div class="method-item" data-method="card" onclick="selectPaymentMethod('card')">
+                                <div class="method-icon">💳</div>
+                                <div class="method-name">银行卡支付</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="payment-actions">
+                        <button class="prev-payment-btn" onclick="goToPaymentStep1()">上一步</button>
+                        <button class="confirm-payment-btn" onclick="processPayment()">确认支付</button>
+                    </div>
+                </div>
+
+                <div class="payment-content" style="display:none;" id="step3Content">
+                    <div class="payment-success">
+                        <div class="success-icon">✓</div>
+                        <h3>支付成功！</h3>
+                        <p>您的预约已确认，请按时前往停车。</p>
+                        <div class="success-details">
+                            <div class="detail-row">
+                                <strong>预约编号：</strong>
+                                <span id="successOrderId">-</span>
+                            </div>
+                            <div class="detail-row">
+                                <strong>车位位置：</strong>
+                                <span id="successLocation">-</span>
+                            </div>
+                            <div class="detail-row">
+                                <strong>支付金额：</strong>
+                                <span id="successAmount">-</span>
+                            </div>
+                            <div class="detail-row">
+                                <strong>交易单号：</strong>
+                                <span id="successTransactionId">-</span>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="home-btn" onclick="goToHome()">返回首页</button>
+                            <button class="realtime-btn" onclick="goToRealtime()">查看车位</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 立体停车场管理系统 | 服务热线: 400-123-4567</p>
+        </footer>
+    </div>
+
+    <script>
+        // 导航函数 - 注意路径
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+        
+        function goToHome() {
+            window.location.href = '../index.html';
+        }
+        
+        function goToRealtime() {
+            window.location.href = 'realtime-display.html';
+        }
+        
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message message-${type}`;
+            messageDiv.textContent = message;
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                background: ${type === 'error' ? '#ff4757' : type === 'success' ? '#00a8ff' : '#667eea'};
+                color: white;
+                border-radius: 5px;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+            document.body.appendChild(messageDiv);
+            setTimeout(() => messageDiv.remove(), 3000);
+        }
+        
+        let selectedPaymentMethod = null;
+        
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            document.querySelectorAll('.method-item').forEach(el => {
+                el.classList.remove('selected');
+            });
+            document.querySelector(`.method-item[data-method="${method}"]`).classList.add('selected');
+        }
+        
+        let currentReservation = null;
+        let overtimeInfo = null;
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadReservationData();
+            displayOrderInfo();
+        });
+        
+        async function loadReservationData() {
+            try {
+                const pendingReservation = sessionStorage.getItem('pendingReservation');
+                if (pendingReservation) {
+                    currentReservation = JSON.parse(pendingReservation);
+                }
+                
+                const overtimeData = sessionStorage.getItem('overtimePayment');
+                if (overtimeData && !currentReservation) {
+                    const data = JSON.parse(overtimeData);
+                    currentReservation = data.reservation;
+                    overtimeInfo = data.overtimeInfo;
+                }
+                
+                if (!currentReservation) {
+                    showMessage('未找到预约信息', 'error');
+                    setTimeout(() => { window.location.href = '../index.html'; }, 2000);
+                }
+            } catch(e) {
+                console.error('加载数据失败:', e);
+            }
+        }
+        
+        function displayOrderInfo() {
+            if (!currentReservation) return;
+            
+            const startTime = new Date(currentReservation.startTime);
+            const endTime = new Date(currentReservation.endTime);
+            const duration = (endTime - startTime) / (1000 * 60 * 60);
+            
+            const isOvertime = overtimeInfo && overtimeInfo.hasOvertime;
+            const totalAmount = isOvertime ? overtimeInfo.fee : (currentReservation.fee || Math.ceil(duration) * 5);
+            
+            document.getElementById('orderId').textContent = currentReservation.orderId || '生成中...';
+            document.getElementById('phoneNumber').textContent = maskPhone(currentReservation.phoneNumber);
+            document.getElementById('location').textContent = `${currentReservation.garage}区 ${currentReservation.level}层 ${currentReservation.spotNumber}号`;
+            document.getElementById('timeRange').textContent = `${formatDateTime(startTime)} - ${formatDateTime(endTime)}`;
+            document.getElementById('duration').textContent = `${duration.toFixed(1)} 小时`;
+            document.getElementById('totalAmount').textContent = `¥${totalAmount}`;
+            
+            sessionStorage.setItem('paymentAmount', totalAmount);
+            
+            if (isOvertime && overtimeInfo) {
+                const orderInfoDiv = document.querySelector('.order-info');
+                const overtimeHtml = `<div class="info-row overtime-row" style="color:#ff4757;"><span class="info-label">超时说明：</span><span class="info-value">超时 ${overtimeInfo.hours} 小时，费用 ¥${overtimeInfo.fee}</span></div>`;
+                const totalRow = orderInfoDiv.querySelector('.total-row');
+                if (totalRow) totalRow.insertAdjacentHTML('beforebegin', overtimeHtml);
+            }
+        }
+        
+        function goToPaymentStep2() {
+            showPaymentStep(2);
+        }
+        
+        function goToPaymentStep1() {
+            showPaymentStep(1);
+        }
+        
+        async function processPayment() {
+            if (!selectedPaymentMethod) {
+                showMessage('请选择支付方式', 'warning');
+                return;
+            }
+            
+            const totalAmount = parseInt(sessionStorage.getItem('paymentAmount') || '0');
+            const confirmBtn = document.querySelector('.confirm-payment-btn');
+            const originalText = confirmBtn.textContent;
+            confirmBtn.textContent = '处理中...';
+            confirmBtn.disabled = true;
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            const transactionId = 'TXN' + Date.now() + Math.floor(Math.random() * 10000);
+            
+            // 保存到localStorage
+            const paymentRecord = {
+                id: Date.now(),
+                reservationId: currentReservation.id,
+                amount: totalAmount,
+                paymentMethod: selectedPaymentMethod,
+                transactionId: transactionId,
+                paidAt: new Date().toISOString()
+            };
+            const payments = JSON.parse(localStorage.getItem('parking_payments') || '[]');
+            payments.push(paymentRecord);
+            localStorage.setItem('parking_payments', JSON.stringify(payments));
+            
+            // 更新预约状态
+            if (currentReservation.id) {
+                const reservations = JSON.parse(localStorage.getItem('parking_reservations') || '[]');
+                const idx = reservations.findIndex(r => r.id === currentReservation.id);
+                if (idx !== -1) {
+                    reservations[idx].status = 'paid';
+                    localStorage.setItem('parking_reservations', JSON.stringify(reservations));
+                }
+            }
+            
+            showPaymentStep(3);
+            document.getElementById('successOrderId').textContent = currentReservation.orderId || '生成中...';
+            document.getElementById('successLocation').textContent = `${currentReservation.garage}区 ${currentReservation.level}层 ${currentReservation.spotNumber}号`;
+            document.getElementById('successAmount').textContent = `¥${totalAmount}`;
+            document.getElementById('successTransactionId').textContent = transactionId;
+            
+            sessionStorage.removeItem('pendingReservation');
+            sessionStorage.removeItem('overtimePayment');
+            
+            confirmBtn.textContent = originalText;
+            confirmBtn.disabled = false;
+        }
+        
+        function showPaymentStep(step) {
+            for (let i = 1; i <= 3; i++) {
+                const content = document.getElementById(`step${i}Content`);
+                if (content) content.style.display = 'none';
+                const stepEl = document.getElementById(`step${i}`);
+                if (stepEl) {
+                    if (i < step) {
+                        stepEl.classList.add('completed');
+                        stepEl.classList.remove('active');
+                    } else if (i === step) {
+                        stepEl.classList.add('active');
+                        stepEl.classList.remove('completed');
+                    } else {
+                        stepEl.classList.remove('active', 'completed');
+                    }
+                }
+            }
+            const currentContent = document.getElementById(`step${step}Content`);
+            if (currentContent) currentContent.style.display = 'block';
+        }
+        
+        function maskPhone(phone) {
+            if (!phone || phone.length !== 11) return phone;
+            return phone.substring(0, 3) + '****' + phone.substring(7);
+        }
+        
+        function formatDateTime(date) {
+            return `${date.getMonth()+1}/${date.getDate()} ${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`;
+        }
+        
+        // 添加样式
+        const style = document.createElement('style');
+        style.textContent = `@keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}.method-item.selected{background:linear-gradient(135deg,#667eea10,#764ba210);border-color:#667eea;}.method-item{cursor:pointer;border:2px solid #e0e0e0;border-radius:10px;padding:15px 20px;display:flex;align-items:center;gap:15px;transition:all 0.3s;margin-bottom:10px;}.method-item:hover{border-color:#667eea;}.method-icon{font-size:28px;}.method-name{font-size:18px;font-weight:bold;}`;
+        document.head.appendChild(style);
+        
+        // 暴露全局函数
+        window.goToPaymentStep2 = goToPaymentStep2;
+        window.goToPaymentStep1 = goToPaymentStep1;
+        window.processPayment = processPayment;
+        window.selectPaymentMethod = selectPaymentMethod;
+        window.goToHome = goToHome;
+        window.goToRealtime = goToRealtime;
+        window.navigateTo = navigateTo;
+    </script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>立体停车场管理系统</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <img src="images/logo.png" alt="停车场Logo" onerror="this.src='https://via.placeholder.com/50x50?text=P'">
+                <h1>立体停车场管理系统</h1>
+            </div>
+            <nav>
+                <button class="nav-btn" onclick="navigateTo('index.html')">首页</button>
+                <button class="nav-btn" onclick="navigateTo('pages/reservation.html')">预约车位</button>
+                <button class="nav-btn" onclick="navigateTo('pages/realtime-display.html')">实时车位</button>
+                <button class="nav-btn" onclick="navigateTo('pages/alarm.html')">应急报警</button>
+                <button class="nav-btn" onclick="navigateTo('pages/pickup.html')">取车</button>
+            </nav>
+        </header>
+
+        <main>
+            <section class="hero">
+                <h2>欢迎使用立体停车场管理系统</h2>
+                <p>智能预约 · 实时监控 · 便捷取车</p>
+                <div class="stats">
+                    <div class="stat-card">
+                        <h3>总车位</h3>
+                        <p id="totalSpots">52</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>已预约</h3>
+                        <p id="bookedSpots">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>空闲车位</h3>
+                        <p id="availableSpots">0</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="quick-actions">
+                <h3>快速操作</h3>
+                <div class="action-buttons">
+                    <button class="action-btn primary" onclick="navigateTo('pages/reservation.html')">
+                        🅿️ 立即预约
+                    </button>
+                    <button class="action-btn" onclick="navigateTo('pages/realtime-display.html')">
+                        📊 查看车位
+                    </button>
+                    <button class="action-btn warning" onclick="navigateTo('pages/alarm.html')">
+                        🚨 紧急报警
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 立体停车场管理系统 | 服务热线: 400-123-4567</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/api/parking-data.js"></script>
+</body>
+</html>
