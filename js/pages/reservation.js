@@ -282,6 +282,12 @@
         } else {
             sessionStorage.setItem('pendingReservation', JSON.stringify(reservation));
         }
+        
+        // ✅ 通过 MQTT 通知硬件（正确位置）
+        if (typeof publishReservation === 'function') {
+            publishReservation(formData.garage, formData.level, spot.spotNumber);
+        }
+        
         window.location.href = 'payment.html';
     };
 

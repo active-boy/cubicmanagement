@@ -216,3 +216,26 @@
         return phone.substring(0, 3) + '****' + phone.substring(7);
     }
 })();
+
+// 供 MQTT 回调调用，更新车位显示
+window.updateSpotFromMQTT = function(msg) {
+    // 消息格式示例: "A|1|3|occupied" 或 "A|1|3|free"
+    const parts = msg.split('|');
+    if (parts.length >= 4) {
+        const garage = parts[0];
+        const level = parts[1];
+        const spotNumber = parts[2];
+        const status = parts[3];
+        // 找到对应车位元素并改变样式
+        const spotElement = document.querySelector(`.spot-card[data-garage="${garage}"][data-level="${level}"][data-spot="${spotNumber}"]`);
+        if (spotElement) {
+            if (status === 'occupied') {
+                spotElement.classList.add('occupied');
+                spotElement.classList.remove('available');
+            } else {
+                spotElement.classList.add('available');
+                spotElement.classList.remove('occupied');
+            }
+        }
+    }
+};

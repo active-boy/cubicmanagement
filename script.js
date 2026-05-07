@@ -179,3 +179,62 @@ window.isSpotAvailable = isSpotAvailable;
 window.isPhoneNumberUsed = isPhoneNumberUsed;
 window.calculateFee = calculateFee;
 window.formatDateTime = formatDateTime;
+
+// ==================== MQTT 集成开始 ====================
+const mqttBroker = "wss://broker.emqx.io:8084/mqtt";
+let mqttClient = null;
+
+// 连接 MQTT
+function connectMQTT() {
+    if (!window.mqtt) {
+        console.warn("MQTT 库未加载，稍后重试");
+        setTimeout(connectMQTT, 500);
+        return;
+    }
+    mqttClient = mqtt.connect(mqttBroker);
+    mqttClient.on('connect', () => {
+        console.log('✅ MQTT 连接成功');
+        // 订阅车牌识别主题
+        mqttClient.subscribe('parking/plate', (err) => {
+            if (!err) console.log('已订阅 parking/plate');
+        });
+        // 订阅硬件状态主题（可选）
+        mqttClient.subscribe('parking/status');
+    });
+    
+    mqttClient.on('message', (topic, message) => {
+        const msg = message.toString();
+        console.log(`📨 MQTT 收到 [${topic}]: ${msg}`);
+        
+        if (topic === 'parking/plate') {
+            // 自动填入车牌号（如果有输入框）
+            const plateInput = document.getElementById('plateNumber');
+            if (plateInput) plateInput.value = msg;
+            showMessage(`识别到车牌：${msg}，已自动填写`, 'success');
+        }
+        
+        if (topic === 'parking/status') {
+            // 可选：更新实时车位显示
+            if (window.updateSpotFromMQTT) window.updateSpotFromMQTT(msg);
+        }
+    });
+}
+
+// 发布预约指令给硬件
+function publishReservation(garage, level, spotNumber) {
+    if (mqttClient && mqttClient.connected) {
+        const payload = `${garage}|${level}|${spotNumber}`;
+        mqttClient.publish('parking/reserve', payload);
+        console.log(`📤 已发布预约指令：${payload}`);
+    } else {
+        console.warn("MQTT 未连接，无法发送预约指令");
+    }
+}
+
+// 页面加载时启动 MQTT 连接
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', connectMQTT);
+} else {
+    connectMQTT();
+}
+// ==================== MQTT 集成结束 ====================
