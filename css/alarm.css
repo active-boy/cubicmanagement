@@ -2,7 +2,7 @@
     background: white;
     border-radius: 10px;
     padding: 30px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);//123456
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
 .alarm-container h2 {
